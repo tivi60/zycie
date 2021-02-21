@@ -1,0 +1,236 @@
+<!DOCYPE html>
+<html lang="PL">
+<head>
+	<meta charset="UTF-8">
+	<title>CLICKER</title>
+	
+	<style>
+		body
+		{
+			color: white;
+			font-family: Lato;
+			background-color: #303030;
+		}
+		
+		#ALL
+		{
+			margin-left: auto;
+			margin-right: auto;
+			padding: 20px;
+			width: 80%;
+		}
+		
+		.strona
+		{
+			float: left;
+			width: 40%;
+		}
+		
+		#GameLog
+		{
+			margin-top: 50px;
+			border: 2px solid white;
+			height: 30%;
+			text-align: center;
+			margin-right: 20px;
+		}
+	</style>
+	
+	<script>
+		
+	//All global VARs ----------------------------------------------------------------------------------------------------------
+		var Money = 0;
+		var MoneyPlus = 0;
+		
+		
+	//All global functions
+		function start()
+		{
+			load();
+			UpChecker();
+			ToScientific();
+		}
+		
+		function save()
+		{
+			var Save = 
+			{
+				Money: Money, MoneyPlus: MoneyPlus,
+				SklepNumber: SklepNumber, SklepUpgradeNumber: SklepUpgradeNumber, SklepPower: SklepPower, SklepCost: SklepCost,
+				KioskNumber: KioskNumber, KioskUpgradeNumber: KioskUpgradeNumber, KioskPower: KioskPower, KioskCost: KioskCost,
+			}
+			localStorage.setItem("Saved", JSON.stringify(Save));
+		}
+		
+		function load()
+		{
+			var Savegame = JSON.parse(localStorage.getItem("Saved"));
+			
+			if (typeof Savegame.Money !== "undefined") Money = Savegame.Money;
+			document.getElementById("MoneyCount").innerHTML = Money;
+			
+			
+			if (typeof Savegame.MoneyPlus !== "undefined") MoneyPlus = Savegame.MoneyPlus;
+			document.getElementById("mpc").innerHTML = MoneyPlus;
+			document.getElementById("Click1").innerText = "+" + (MoneyPlus + 1);
+			
+			
+			
+			if (typeof Savegame.SklepCost !== "undefined") SklepCost = Savegame.SklepCost;
+			if (typeof Savegame.SklepNumber !== "undefined") SklepNumber = Savegame.SklepNumber;
+			if (typeof Savegame.SklepPower !== "undefined") SklepPower = Savegame.SklepPower;
+			if (typeof Savegame.SklepUpgradeNumber !== "undefined") SklepUpgradeNumber = Savegame.SklepUpgradeNumber;
+			document.getElementById("SklepNumber").innerHTML = SklepNumber;
+			document.getElementById("SklepCost").innerHTML = SklepCost;
+			
+			
+		}
+		
+		function reset()
+		{
+			localStorage.clear();
+			location.reload();
+		}
+		
+		function UpChecker()
+		{
+			if (SklepUpgradeNumber >= 1)
+			{
+				document.getElementById("SklepUp1").style.display = "none";
+				document.getElementById("SklepUp1D").style.display = "inline";
+			}
+			
+		}
+		
+		function ToScientific()
+		{
+			if (Money >= 1000000)
+			{
+				var MoneyToSci = Money.toExponential(2);
+				document.getElementById("MoneyCount").innerHTML = MoneyToSci;
+			}
+		}
+		
+		
+		
+	//All Building VARs --------------------------------------------------------------------------------------------------------
+		//Sklep -------------------
+		var SklepNumber = 0;
+		var SklepCost = 10;
+		var SklepPower = 0;
+		var SklepUpgradeNumber = 0;
+	//All Building VARs --------------------------------------------------------------------------------------------------------
+		
+		
+	//funkcja klikania
+		function AddMoney(number)
+		{
+			document.getElementById("LogText").src = "2.jpg";
+			setTimeout(function(){
+				document.getElementById("LogText").src = "";
+			}, 2500);
+		
+			Money = Money + number + MoneyPlus;
+			document.getElementById("MoneyCount").innerHTML = Money;
+			ToScientific();
+		}
+		
+		function MoneyP()
+		{
+			MoneyPlus = MoneyPlus + 1;
+			document.getElementById("mpc").innerHTML = MoneyPlus;
+			document.getElementById("Click1").innerText = "+" + (MoneyPlus + 1);
+		}
+		
+	//Buildings ------------------------------------------------------------------------------------------------------------------
+		//Sklep -------------------------------------------------------------------
+		function BuySklep()
+		{
+			if (Money >= SklepCost)
+			{
+				Money = Money - SklepCost;
+				SklepCost = SklepCost + 1;
+				SklepNumber = SklepNumber + 1;
+				SklepPower = SklepPower + 1;
+				document.getElementById("MoneyCount").innerHTML = Money;
+				document.getElementById("SklepCost").innerHTML = SklepCost;
+				document.getElementById("SklepNumber").innerHTML = SklepNumber;
+				ToScientific();
+			}
+		}
+		
+		function SklepUpgrade(number)
+		{
+			if ((number == 1) && (Money >= 100) && (SklepNumber >= 10))
+			{
+				Money = Money - 100;
+				SklepPower = SklepPower * 2;
+				SklepUpgradeNumber = SklepUpgradeNumber + 1;
+				
+				document.getElementById("MoneyCount").innerHTML = Money;
+				
+				document.getElementById("SklepUp1").style.display = "none";
+				document.getElementById("SklepUp1D").style.display = "inline";
+			}
+			else
+			{
+				document.getElementById("LogText").innerHTML = "you need: $100, 10 sklep";
+				setTimeout(function(){
+					document.getElementById("LogText").innerHTML = "";
+				}, 2500);
+			}
+		}
+		//Sklep -------------------------------------------------------------------
+		window.setInterval(function()
+		{
+			if (SklepNumber >= 1)
+			{
+				AddMoney(SklepPower);
+			}
+			
+			
+			ToScientific();
+			save();
+			
+		}, 1000)
+		
+	</script>
+	
+</head>
+<body onload="start()">
+<div id="ALL">
+<div id="GAME">
+	<div class="strona">
+		$ <span id="MoneyCount">0</span><br />
+		<button onclick="AddMoney(1)" id="Click1" class="Butt">+1</button>
+		<div id="GameLog">
+		
+		
+			<img id="LogText" src= height="80%;" />
+		</div>
+		
+		
+	</div>
+	<div class="strona">
+	
+		<button onclick="save()" class="Butt">save</button>
+		<button onclick="load()" class="Butt">load</button>
+		<button onclick="reset()" class="Butt">reset</button>
+		
+		<div id="Sklep">
+			<br />Sklep<br />
+			You Have: <span id="SklepNumber"> 0</span><br />
+			Cost: <span id="SklepCost"> 10</span><br />
+			<button onclick="BuySklep()" class="Butt">buy!</button><br />
+		
+		
+		</div>
+	
+	</div>
+</div>
+
+	
+
+</div>
+</body>
+</html>
